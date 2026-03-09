@@ -9,10 +9,31 @@ export default function App() {
     const [altura, setAltura] = useState<string>("");
     const [imc, setIMC] = useState<number | null>(null);
     const [classificacao, setClassificacao] = useState<string | null>(null);
+    
+    // 1. Estado para armazenar a mensagem de erro
+    const [erro, setErro] = useState<string>("");
+
+    // 2. Função solicitada na atividade
+    function validarCampos() {
+        if (peso.trim() === "" || altura.trim() === "") {
+            setErro("Preencha o peso e a altura");
+            return; // Para a execução aqui e não calcula
+        }
+        
+        // Se passou da verificação, limpa o erro e calcula
+        setErro(""); 
+        calcularIMC();
+    }
 
     function calcularIMC(){
-        let imcCalculado = parseFloat(peso) / (parseFloat(altura)*parseFloat(altura));
+        // Substituindo a vírgula por ponto para não dar erro no cálculo
+        let pesoCorrigido = peso.replace(',', '.');
+        let alturaCorrigida = altura.replace(',', '.');
+
+        let imcCalculado = parseFloat(pesoCorrigido) / (parseFloat(alturaCorrigida)*parseFloat(alturaCorrigida));
+        
         setIMC(imcCalculado);
+        
         if(imcCalculado < 18.5){
             setClassificacao("Abaixo do peso");
         }else if(imcCalculado < 25){
@@ -29,13 +50,22 @@ export default function App() {
             <Topo/>
 
             <View style={styles.form}>
+                
+                {/* 3. Caixa de alerta que só aparece se houver um erro */}
+                {erro !== "" && (
+                    <View style={styles.alerta}>
+                        <Text style={styles.alertaTexto}>{erro}</Text>
+                    </View>
+                )}
+
                 <Text style={styles.label}>Peso</Text>
-                <TextInput style={styles.input} onChangeText={setPeso}></TextInput>
+                <TextInput style={styles.input} onChangeText={setPeso} keyboardType="numeric"></TextInput>
                 
                 <Text style={styles.label}>Altura</Text>
-                <TextInput style={styles.input} onChangeText={setAltura}></TextInput>
+                <TextInput style={styles.input} onChangeText={setAltura} keyboardType="numeric"></TextInput>
 
-                <TouchableOpacity style={styles.btn} onPress={calcularIMC}>
+                {/* 4. Trocamos a função chamada no botão para validarCampos */}
+                <TouchableOpacity style={styles.btn} onPress={validarCampos}>
                     <Text style={styles.btnText}>Calcular</Text>
                 </TouchableOpacity>
 
@@ -52,13 +82,25 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#06C',
     },
-    
     form: {
         backgroundColor: '#FFF',
         height: '100%',
         borderTopStartRadius: 30,
         borderTopEndRadius: 30,
         padding: 30
+    },
+    // 5. Estilos para a caixa vermelha de erro
+    alerta: {
+        backgroundColor: '#DC3545', // Cor vermelha parecida com a do exercício
+        padding: 15,
+        borderRadius: 5,
+        marginBottom: 20,
+        alignItems: 'center',
+    },
+    alertaTexto: {
+        color: '#FFF',
+        fontWeight: 'bold',
+        fontSize: 16,
     },
     label: {
         fontSize: 22,
@@ -84,6 +126,4 @@ const styles = StyleSheet.create({
         color: '#FFF',
         fontSize: 22
     },
-    
-    
 });
